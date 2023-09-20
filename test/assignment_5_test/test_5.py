@@ -1,6 +1,7 @@
 import unittest
-from PysparkAssignments.src.assignment_5.utils import expr,StringType,IntegerType,DateType,StructType,\
-    StructField,SparkSession,pivot_df, unpivot_dataframe
+
+from PysparkAssignment.src.assignment_5.driver import country_amount
+from PysparkAssignment.src.assignment_5.util import *
 
 data = [
         ("banana", 1000, "USA"),
@@ -24,9 +25,9 @@ class MyTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.spark.stop()
-    def test_pivot_table(self):
+    def test_pivot_amount(self):
         df = self.spark.createDataFrame(data=data, schema=schema)
-        result_df=pivot_df(df)
+        result_df=country_amount(df)
         actual_df=result_df.collect()
 
         expected_data = [
@@ -46,7 +47,7 @@ class MyTestCase(unittest.TestCase):
         df2 = self.spark.createDataFrame(data=expected_data,schema=expected_schema)
         expected_df=df2.collect()
         self.assertEqual(actual_df,expected_df)
-    def test_unpivot_dataframe(self):
+    def test_unpivot_country(self):
         data = [
             ("orange", None, None, 2000, 2000, None, None),
             ("beans", None, None, None, None, None, 1600),

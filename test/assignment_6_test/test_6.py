@@ -1,7 +1,5 @@
 import unittest
-from src.assignment_sql_4.utils import  col,row_number,avg,sum,min,max,\
-    SparkSession,dept_wise_row_first,dept_wise_high_sal,\
-    low_avg_high_totalsal,StringType,IntegerType,DateType,StructType,StructField,FloatType
+from PysparkAssignment.src.assignment_6.util import *
 
 data=[("James","Sales",3000),
       ("Michael","Sales",4600),

@@ -1,13 +1,14 @@
-from src.Assignment_4.utils import *
+from PysparkAssignment.src.assignment_6.util import *
 
 spark = spark_session()
-employee_df = create_df(spark)
-employee_df.show()
-dept_df = dept_grp(employee_df)
+
+user_df = create_df(spark)
+user_df.show()
+dept_df = dept_group(user_df)
 dept_df.show()
 new_df = row_data(spark)
 new_df.show()
-highest_sal = highest_salary(employee_df)
+highest_sal = highest_salary(user_df)
 highest_sal.show()
-multi_df = multi_action(employee_df)
+multi_df = multi_action(user_df)
 multi_df.show()

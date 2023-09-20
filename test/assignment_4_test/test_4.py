@@ -1,8 +1,7 @@
 import unittest
-from src.assignment_2.utils import SparkSession, unix_timestamp,from_unixtime,col,to_utc_timestamp,date_format,\
-    trim,from_utc_timestamp,unix_timestamp,lit,transform_keys,expr,StringType,IntegerType,\
-    DateType,StructType,StructField,MapType,select_nested_columns,add_columns,change_column,change_datatype,\
-    rename_nested_column,distinct_value,drop_columns
+
+from PysparkAssignment.src.assignment_4.driver import select_col_df, age_df
+from PysparkAssignment.src.assignment_4.util import *
 
 data = [
     ({"firstname": "James", "middlename": "", "lastname": "Smith"}, "03011998", "M", 3000),
@@ -20,7 +19,7 @@ class MyTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.spark = SparkSession.builder.master("local[1]").appName("Pyspark assignment 2").getOrCreate()
+        cls.spark = SparkSession.builder.master("local[1]").appName("Pyspark assignment 4").getOrCreate()
 
     @classmethod
     def tearDownClass(cls):
@@ -41,12 +40,12 @@ class MyTestCase(unittest.TestCase):
             StructField("salary", IntegerType(), True)
         ])
         df2 = self.spark.createDataFrame(data=expected_data, schema=expected_schema)
-        expected_df =  df2.collect()
+        expected_df = df2.collect()
         self.assertEqual(actual_df, expected_df)
 
-    def test_select_nested_columns(self):
+    def test_select_df(self):
         df = self.spark.createDataFrame(data=data, schema=schema)
-        result_df=select_nested_columns(df)
+        result_df=select_col_df(df)
         expected_data= [("James", "Smith", 3000),
                         ("Michael","", 20000),
                         ("Robert", "Williams", 3000)]
@@ -54,13 +53,13 @@ class MyTestCase(unittest.TestCase):
                                 StructField("salary", IntegerType(),True)])
 
         df2 = self.spark.createDataFrame(data=expected_data, schema=expected_schema)
-        actual_df=  result_df.collect()
-        expected_df =  df2.collect()
+        actual_df=result_df.collect()
+        expected_df =df2.collect()
         self.assertEqual(actual_df, expected_df)
 
-    def test_add_columns(self):
+    def test_add_column(self):
         df = self.spark.createDataFrame(data=data, schema=schema)
-        result_df = add_columns(df)
+        result_df = age_df(df)
 
         expected_data = [({"middlename": "", "firstname": "James", "lastname": "Smith"}, "03011998", "M", 3000, "Ind", "Civil", 28),
             ({"middlename": "Rose", "firstname": "Michael", "lastname": ""}, "10111998", "M", 20000, "Ind", "Civil", 28),
@@ -79,9 +78,9 @@ class MyTestCase(unittest.TestCase):
         expected_data = expected_df.collect()
 
         self.assertEqual(actual_data, expected_data)
-    def test_change_column(self):
+    def test_salary_change(self):
         df = self.spark.createDataFrame(data=data, schema=schema)
-        result_df=change_column(df)
+        result_df=salarynew(df)
         actual_data=result_df.collect()
 
         expected_data = [
@@ -113,7 +112,7 @@ class MyTestCase(unittest.TestCase):
         df2=self.spark.createDataFrame(data=expected_data,schema=expected_schema)
         expected_df=df2.collect()
         self.assertEqual(actual_input,expected_df)
-    def test_rename_nested_column(self):
+    def test_rename_column(self):
         df = self.spark.createDataFrame(data=data, schema=schema)
         result_df = rename_nested_column(df)
         actual_input = result_df.collect()

@@ -13,8 +13,13 @@ def spark_session():
  #Create Schema
 def create_dataframe(spark):
 
-    user_data= [("James","","Smith","03011998","M","3000"),("Michael","Rose","","10111998","M","20000"),("Robert","","Williams","02012000","M","3000"),("Maria","Anne","Jones","03011998","F","11000"),
-       ("Jen","Mary","Brown","04101998","F","10000")]
+    user_data=  [
+    (("James", "", "Smith"), "03011998", "M", 3000),
+    (("Michael", "Rose", ""), "10111998", "M", 20000),
+    (("Robert", "", "Williams"), "02012000", "M", 3000),
+    (("Maria", "Anne", "Jones"), "03011998", "F", 11000),
+    (("Jen", "Mary", "Brown"), "04101998", "F", 10000)
+]
 
     user_schema=StructType([
         StructField('name',StructType([
@@ -22,7 +27,7 @@ def create_dataframe(spark):
     StructField("middlename",StringType(),True),
     StructField("lastname",StringType(),True)
             ])),
-    StructField("dob",IntegerType(),True),
+    StructField("dob",StringType(),True),
     StructField("gender",StringType(),True),
     StructField("salary",IntegerType(),True)
     ])
@@ -32,52 +37,50 @@ def create_dataframe(spark):
 
 #Select firstname, lastname and salary from Dataframe
 def select_df(user_df):
-    select_col_df=user_df.select("name.firstname","name.lastname","salary")
+    select_col_df=user_df.select(col("name.firstname"), col("name.lastname"), col("salary"))   # nested columns like "name.firstname" and "name.lastname use col
     return select_col_df
 
 #Add Country, department, and age column in the dataframe
 def add_column(user_df):
-    user_new_df=user_df.withcolumn("country",lit("India"))\
-         .withcolumn("department",lit("sales"))
-    age_column_df=user_new_df.withcolumn("age",
-                 when(col("name.firstname") == "James", lit("30")).
+    country_df= user_df.withColumn("country",lit("India"))
+    department_df=country_df.withColumn("department",lit("sales"))
+    age_df=department_df.withColumn("age",
+                when(col("name.firstname") == "James", lit("30")).
                 when(col("name.firstname")=="Michael",lit("23")).
                 when(col("name.firstname") == "Robert", lit("25")).
-                when(col("name.firstname") == "Maria", lit("28")).
-    otherwise(lit("26")))
+                when(col("name.firstname") == "Maria", lit("20")).
+                otherwise(lit("20")))
 
-    return age_column_df
+    return age_df
 
 
 #Change the value of salary column
 def salary_change(user_df):
-    salarynew_df=user_df.withcolumn("salarynew",(col("salary")*3))
+    salarynew_df=user_df.withColumn("salarynew",(col("salary")*2))
     return salarynew_df
+
+
 #Change the data types of DOB and salary to String
 
-
 def change_datatype(user_df):
-    change_datatype_df= user_df.withColumn("dob",col("dob").cast(StringType()))\
-                        .withColumn("salary",col("salary".cast(StringType()))
-    return change_datatype
+    change_datatype_df= user_df.withColumn("dob",col("dob").cast(StringType())).withColumn("salary",col("salary").cast(StringType()))
+    return change_datatype_df
+
 #Derive new column from salary column.
 
 #Rename nested column( Firstname -> firstposition, middlename -> secondposition, lastname -> lastposition)
 
 def rename_column(user_df):
-    rename_column_df=user_df.withColumn(
-    "name",
-    expr("map('firstposition', firstname, 'secondposition', middlename, 'lastposition', lastname)")
-)
-    return rename_column_df                 #user_df.select(
-                                                   #col("name.firstname").alias("firstposition"),
-                                                   #col("name.middlename").alias("secondposition"),
-                                                   #col("name.lastname").alias("lastposition")
+    rename_column_df=user_df.select(col("name.firstname").alias("firstposition"),
+                                   col("name.middlename").alias("secondposition"),
+                                   col("name.lastname").alias("lastposition")
+                                   )
+    return rename_column_df
 
 #Filter the name column whose salary in maximum.
-def name_filter(user_df):
-    max_salary = user_df.agg({"salary": "max"}).collect()[0][0]
-    name_filter_df = user_df.filter(user_df.salary == max_salary).select("name").collect()[0]
+def name_filter(user_df):                                       #Collect method collects the result of the aggregation operation. It returns a list of Row objects, where each Row corresponds to a row of the result
+    max_salary = user_df.agg({"salary": "max"}).collect()[0][0]          #stores that maximum salary value in the variable max_salary
+    name_filter_df = user_df.filter(user_df.salary == max_salary).select("name")
     return name_filter_df
 
 #Drop the department and age column. [#df.drop(*cols) is used to drop the specified columns (in this case, "dob" and "salary") from the DataFrame df.
